@@ -40,3 +40,17 @@ Keep that terminal open. The app binds only to 127.0.0.1. Python's standard libr
 - `tools/sync-options.py`: incremental import utility; requires DuckDB when importing new source files. Running the website does not require DuckDB.
 
 GitHub Pages publishes the main branch root. Push changes to main to update the website. No broker credentials, account connections or live trading are included. Browser imports remain in the visitor's browser. The online site does not automatically read or monitor the original Desktop folder.
+
+### Faster repeat backtests
+
+Option sessions are processed by four background workers. The browser caches daily
+files by the manifest content hash and caches the entry/exit quote windows, so
+changing option legs or costs can reuse those windows without downloading or
+parsing the entire day again. Changing signal timing rebuilds the required window
+from the cached day. Results are assembled in chronological order.
+
+The run status shows cached and downloaded session counts. Cache storage is local
+to this browser and site address; clearing site data or using private browsing may
+remove it. If storage is unavailable, the backtest still runs using downloads.
+The first run over a new date range still needs its option files. Spot files for
+2021–2026 are gzip-compressed for transfer (20.4 MB reduced to 6.0 MB).
