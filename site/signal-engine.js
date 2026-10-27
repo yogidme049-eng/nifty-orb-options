@@ -14,14 +14,14 @@ function backtest(days,p){
   for(let t=p.start;t<=p.end;t++){hi=Math.max(hi,map.get(t)[2]/100);lo=Math.min(lo,map.get(t)[3]/100);}
   let side=!emaMode?0:(d.pc>d.ema?1:-1);const risk=(hi-lo)*p.stop;
   if(risk<=0){audit.push({...auditRow,status:'Zero range'});continue;}
-  let pos=null;
+  let pos=null,completed=0,firstSide=0;
   for(const bar of d.bars){
    const [tm,...prices]=bar,[o,h,l,c]=prices.map(v=>v/100);
    if(tm<Math.max(600,p.end+1)||tm>910)continue;
    if(!pos){
-    if(pureMode&&tm<910)side=c>hi?1:c<lo?-1:0;
+    if((pureMode||(completed&&emaMode))&&tm<910)side=c>hi?1:c<lo?-1:0;
     if(pdhMode&&tm<910)side=c>Math.max(hi,d.pdh)?1:c<Math.min(lo,d.pdl)?-1:0;
-    if(tm<910&&side!==0&&(side===1?c>hi:c<lo))pos={date:d.d,side:side===1?'LONG':'SHORT',entry_bar:tm,entry:c,orb_high:hi,orb_low:lo,risk,stop:c-side*risk,target:c+side*risk*p.target,previous_close:d.pc,previous_ema20:d.ema,ema_distance_pct:distance,...(pdhMode?{previous_day_high:d.pdh,previous_day_low:d.pdl,previous_day_date:d.pd_date}: {})};
+    if(tm<910&&(!completed||side===-firstSide)&&side!==0&&(side===1?c>hi:c<lo))pos={date:d.d,...(p.maxEntries===2?{entry_number:completed+1}:{}),side:side===1?'LONG':'SHORT',entry_bar:tm,entry:c,orb_high:hi,orb_low:lo,risk,stop:c-side*risk,target:c+side*risk*p.target,previous_close:d.pc,previous_ema20:d.ema,ema_distance_pct:distance,...(pdhMode?{previous_day_high:d.pdh,previous_day_low:d.pdl,previous_day_date:d.pd_date}: {})};
     continue;
    }
    let px,why,ambiguous=false;
@@ -35,9 +35,9 @@ function backtest(days,p){
     else continue;
    }
    const points=side*(px-pos.entry);
-   trades.push({...pos,exit_bar:tm,exit:px,exit_reason:why,ambiguous,gross_points:points,net_points:points-p.cost,gross_r:points/risk,net_r:(points-p.cost)/risk,hold_minutes:tm-pos.entry_bar});break;
+   trades.push({...pos,exit_bar:tm,exit:px,exit_reason:why,ambiguous,gross_points:points,net_points:points-p.cost,gross_r:points/risk,net_r:(points-p.cost)/risk,hold_minutes:tm-pos.entry_bar});completed++;firstSide=firstSide||side;if(p.maxEntries!==2||completed>=2||!why.startsWith('Stop'))break;pos=null;
   }
-  audit.push({...auditRow,status:pos?'Trade':'No breakout'});
+  audit.push({...auditRow,status:completed?'Trade':'No breakout'});
  }
  return {trades,audit};
 }

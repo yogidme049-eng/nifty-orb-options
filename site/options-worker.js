@@ -1,6 +1,6 @@
 /* Background loading keeps parsing and contract calculations off the UI thread. */
 'use strict';
-importScripts('./options-engine.js');
+importScripts('./options-engine.js?v=reentry1');
 const rawCacheName='nifty-option-days-v1',windowCacheName='nifty-option-windows-v1';
 async function cacheOpen(name){try{return await caches.open(name);}catch{return null;}}
 async function cached(cache,key){try{return cache?await cache.match(key):null;}catch{return null;}}
@@ -23,7 +23,7 @@ async function loadQuotes(signal,maxDelay,hash){
  await remember(windows,windowKey,new Response(JSON.stringify(quotes),{headers:{'Content-Type':'application/json'}}));
  return {quotes,source};
 }
-self.onmessage=async({data:{signal,p,hash}})=>{
- try{const {quotes,source}=await loadQuotes(signal,p.maxDelay,hash);self.postMessage({part:OptionEngine.simulate([signal],quotes,p),source});}
+self.onmessage=async({data:{signals,p,hash}})=>{
+ try{const quotes=[],sources=[];for(const signal of signals){const loaded=await loadQuotes(signal,p.maxDelay,hash);quotes.push(...loaded.quotes);sources.push(loaded.source);}self.postMessage({part:OptionEngine.simulate(signals,quotes,p),source:sources.includes('download')?'download':'cache'});}
  catch(e){self.postMessage({error:e.message});}
 };

@@ -54,3 +54,15 @@ to this browser and site address; clearing site data or using private browsing m
 remove it. If storage is unavailable, the backtest still runs using downloads.
 The first run over a new date range still needs its option files. Spot files for
 2021–2026 are gzip-compressed for transfer (20.4 MB reduced to 6.0 MB).
+
+## Opposite-side re-entry after SL
+
+Daily entries defaults to two. A second spot signal is allowed only after the
+first signal exits at Stop/Stop gap, on a later bar and in the opposite direction.
+There is no second entry after target/time exit and no third entry. PDH/PDL
+levels still apply in PDH mode; EMA bias chooses only the first direction, while
+the second uses the opposite ORB breakout. The first option basket must actually
+execute, and the second cannot enter before its exit snapshot. Each leg has
+independent First entry lots and Second entry lots (both default to 1). Reports
+and exports identify Entry #1 and #2; quantities, costs and combined P&L use the
+selected lots. Select One entry to retain the previous behavior.
