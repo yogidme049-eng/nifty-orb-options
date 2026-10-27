@@ -65,3 +65,15 @@ execute, and the second cannot enter before its exit snapshot. Each leg has
 independent First entry lots and Second entry lots (both default to 1). Reports
 and exports identify Entry #1 and #2; quantities, costs and combined P&L use the
 selected lots. Select One entry to retain the previous behavior.
+
+## New fixed-range ORB strategy
+
+Select ORB 09:20–09:30 · Boundary SL · 1:2. It uses all eleven minute
+candles labelled 09:20–09:30 and accepts the first close strictly outside the
+range starting with 09:31. No PDH/PDL or EMA filter. Long stop = ORB low;
+short stop = ORB high. Risk is entry-to-stop distance and target is 2R.
+Range, stop model and target are fixed; selecting it defaults to one daily
+entry. Two-entry mode remains available using the documented opposite-side
+reentry after a first stop. The old Pure ORB option has been removed from the
+selector; the remaining alternatives are PDH/PDL and EMA20. Full rules for
+each available strategy are shown at the bottom of the app.

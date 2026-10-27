@@ -1,5 +1,7 @@
 function backtest(days,p){
- const trades=[],audit=[],pdhMode=p.strategy==='pdh',emaMode=p.strategy==='ema',pureMode=p.strategy==='orb';
+ const boundaryMode=p.strategy==='orb_boundary';
+ if(boundaryMode)p={...p,start:560,end:570,stop:1,target:2};
+ const trades=[],audit=[],pdhMode=p.strategy==='pdh',emaMode=p.strategy==='ema',pureMode=p.strategy==='orb'||boundaryMode;
  for(const d of days){
   const map=new Map(d.bars.map(b=>[b[0],b])),distance=Math.abs(d.pc/d.ema-1)*100;
   let reason='';
@@ -17,11 +19,11 @@ function backtest(days,p){
   let pos=null,completed=0,firstSide=0;
   for(const bar of d.bars){
    const [tm,...prices]=bar,[o,h,l,c]=prices.map(v=>v/100);
-   if(tm<Math.max(600,p.end+1)||tm>910)continue;
+   if(tm<(boundaryMode?p.end+1:Math.max(600,p.end+1))||tm>910)continue;
    if(!pos){
     if((pureMode||completed)&&tm<910)side=c>hi?1:c<lo?-1:0;
     if(pdhMode&&!completed&&tm<910)side=c>Math.max(hi,d.pdh)?1:c<Math.min(lo,d.pdl)?-1:0;
-    if(tm<910&&(!completed||side===-firstSide)&&side!==0&&(side===1?c>hi:c<lo))pos={date:d.d,...(p.maxEntries===2?{entry_number:completed+1}:{}),side:side===1?'LONG':'SHORT',entry_bar:tm,entry:c,orb_high:hi,orb_low:lo,risk,stop:c-side*risk,target:c+side*risk*p.target,previous_close:d.pc,previous_ema20:d.ema,ema_distance_pct:distance,...(pdhMode?{previous_day_high:d.pdh,previous_day_low:d.pdl,previous_day_date:d.pd_date}: {})};
+    if(tm<910&&(!completed||side===-firstSide)&&side!==0&&(side===1?c>hi:c<lo)){const entryRisk=boundaryMode?(side===1?c-lo:hi-c):risk;pos={date:d.d,...(p.maxEntries===2?{entry_number:completed+1}:{}),side:side===1?'LONG':'SHORT',entry_bar:tm,entry:c,orb_high:hi,orb_low:lo,risk:entryRisk,stop:boundaryMode?(side===1?lo:hi):c-side*entryRisk,target:c+side*entryRisk*p.target,previous_close:d.pc,previous_ema20:d.ema,ema_distance_pct:distance,...(pdhMode?{previous_day_high:d.pdh,previous_day_low:d.pdl,previous_day_date:d.pd_date}: {})};}
     continue;
    }
    let px,why,ambiguous=false;
@@ -35,7 +37,7 @@ function backtest(days,p){
     else continue;
    }
    const points=side*(px-pos.entry);
-   trades.push({...pos,exit_bar:tm,exit:px,exit_reason:why,ambiguous,gross_points:points,net_points:points-p.cost,gross_r:points/risk,net_r:(points-p.cost)/risk,hold_minutes:tm-pos.entry_bar});completed++;firstSide=firstSide||side;if(p.maxEntries!==2||completed>=2||!why.startsWith('Stop'))break;pos=null;
+   trades.push({...pos,exit_bar:tm,exit:px,exit_reason:why,ambiguous,gross_points:points,net_points:points-p.cost,gross_r:points/pos.risk,net_r:(points-p.cost)/pos.risk,hold_minutes:tm-pos.entry_bar});completed++;firstSide=firstSide||side;if(p.maxEntries!==2||completed>=2||!why.startsWith('Stop'))break;pos=null;
   }
   audit.push({...auditRow,status:completed?'Trade':'No breakout'});
  }
