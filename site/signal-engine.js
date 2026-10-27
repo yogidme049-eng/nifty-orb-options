@@ -1,7 +1,7 @@
 function backtest(days,p){
  const boundaryMode=['orb_boundary','orb_boundary_pdh'].includes(p.strategy);
  if(boundaryMode)p={...p,start:560,end:570,stop:1,target:2};
- const trades=[],audit=[],pdhMode=p.strategy==='pdh'||p.strategy==='orb_boundary_pdh',emaMode=p.strategy==='ema',pureMode=p.strategy==='orb'||boundaryMode;
+ const trades=[],audit=[],pdhMode=p.strategy==='pdh'||p.strategy==='pdh_early'||p.strategy==='orb_boundary_pdh',emaMode=p.strategy==='ema',pureMode=p.strategy==='orb'||boundaryMode;
  for(const d of days){
   const map=new Map(d.bars.map(b=>[b[0],b])),distance=Math.abs(d.pc/d.ema-1)*100;
   let reason='';
@@ -19,7 +19,7 @@ function backtest(days,p){
   let pos=null,completed=0,firstSide=0;
   for(const bar of d.bars){
    const [tm,...prices]=bar,[o,h,l,c]=prices.map(v=>v/100);
-   if(tm<(boundaryMode?p.end+1:Math.max(600,p.end+1))||tm>910)continue;
+   if(tm<((boundaryMode||p.strategy==='pdh_early')?p.end+1:Math.max(600,p.end+1))||tm>910)continue;
    if(!pos){
     if((pureMode||completed)&&tm<910)side=c>hi?1:c<lo?-1:0;
     if(pdhMode&&!completed&&tm<910)side=c>Math.max(hi,d.pdh)?1:c<Math.min(lo,d.pdl)?-1:0;

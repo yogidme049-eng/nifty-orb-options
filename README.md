@@ -87,3 +87,12 @@ candle. Stop stays at the opposite ORB boundary and target is 2R. No EMA.
 Missing previous-day levels skip the day. Default is one entry; optional
 second entry retains the existing opposite-ORB-only rule after first SL.
 The unfiltered Boundary SL variant remains available separately.
+
+### PDH/PDL + ORB without the 10 AM wait
+
+A separate After range (no 10 AM wait) option checks completed 1-minute
+closes immediately after the selected ORB's last candle. LONG must be above
+both ORB High and PDH; SHORT below both ORB Low and PDL. It retains the
+original risk model: ORB width × Stop setting, measured from entry; target
+uses the selected R multiple. This is distinct from boundary SL. The old
+From 10 AM variant remains available. Rules are listed at the page bottom.
