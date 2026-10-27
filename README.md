@@ -77,3 +77,13 @@ entry. Two-entry mode remains available using the documented opposite-side
 reentry after a first stop. The old Pure ORB option has been removed from the
 selector; the remaining alternatives are PDH/PDL and EMA20. Full rules for
 each available strategy are shown at the bottom of the app.
+
+### Boundary ORB with PDH/PDL filter
+
+A separate selector option, ORB 09:20–09:30 + PDH/PDL · Boundary SL · 1:2,
+requires the first LONG close to exceed both ORB High and PDH, or the first
+SHORT close to be below both ORB Low and PDL. Entries begin with the 09:31
+candle. Stop stays at the opposite ORB boundary and target is 2R. No EMA.
+Missing previous-day levels skip the day. Default is one entry; optional
+second entry retains the existing opposite-ORB-only rule after first SL.
+The unfiltered Boundary SL variant remains available separately.

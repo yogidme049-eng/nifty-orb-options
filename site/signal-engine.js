@@ -1,7 +1,7 @@
 function backtest(days,p){
- const boundaryMode=p.strategy==='orb_boundary';
+ const boundaryMode=['orb_boundary','orb_boundary_pdh'].includes(p.strategy);
  if(boundaryMode)p={...p,start:560,end:570,stop:1,target:2};
- const trades=[],audit=[],pdhMode=p.strategy==='pdh',emaMode=p.strategy==='ema',pureMode=p.strategy==='orb'||boundaryMode;
+ const trades=[],audit=[],pdhMode=p.strategy==='pdh'||p.strategy==='orb_boundary_pdh',emaMode=p.strategy==='ema',pureMode=p.strategy==='orb'||boundaryMode;
  for(const d of days){
   const map=new Map(d.bars.map(b=>[b[0],b])),distance=Math.abs(d.pc/d.ema-1)*100;
   let reason='';
