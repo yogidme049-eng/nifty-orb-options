@@ -96,3 +96,15 @@ both ORB High and PDH; SHORT below both ORB Low and PDL. It retains the
 original risk model: ORB width × Stop setting, measured from entry; target
 uses the selected R multiple. This is distinct from boundary SL. The old
 From 10 AM variant remains available. Rules are listed at the page bottom.
+
+
+## October 29 strategy update
+
+- Plain ORB without PDH/PDL or EMA filters, after the selected range.
+- Pine SL reversal mode: first entry from 10 AM, optional immediate opposite signal after first SL, using stop/gap-open price. Option fills remain after signal confirmation.
+- PDH/PDL-only mode: no ORB, editable SL and target spot points (defaults 50/100), and editable entry-after time (default 09:30 IST). Eligible candles begin strictly after that time.
+- Entry confirmation: 1 minute (default), 3 minutes, or 5 minutes, aligned to 09:15 IST. Exit checks remain on one-minute candles. Pine immediate reversal does not wait for higher-timeframe confirmation.
+- Per-leg first and second lots remain independent. Detailed rules appear below the backtester.
+
+Run regression checks with `node tests/pine-reverse.test.js`.
+For offline use, keep the extracted project together and launch `Start NIFTY Offline.command` (macOS with Python 3), or run `python3 serve.py`.
